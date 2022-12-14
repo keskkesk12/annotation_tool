@@ -14,8 +14,8 @@ def main():
   name = "Image"
   
   # Capture image from webcam
-  camera = cv2.VideoCapture("../soren.MP4")
-  # camera = cv2.VideoCapture(0)
+  # camera = cv2.VideoCapture("../soren.MP4")
+  camera = cv2.VideoCapture(0)
   
   # Create named window
   cv2.namedWindow(name)
