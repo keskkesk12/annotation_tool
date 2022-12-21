@@ -14,8 +14,8 @@ def main():
   name = "Image"
   
   # Capture image from webcam
-  # camera = cv2.VideoCapture("../soren.MP4")
-  camera = cv2.VideoCapture(0)
+  camera = cv2.VideoCapture("../raw_data/aruco_test_3.mp4")
+  # camera = cv2.VideoCapture(0)
   
   # Create named window
   cv2.namedWindow(name)
@@ -26,6 +26,9 @@ def main():
   p0 = (430, 200)
   l1 = 120
   l2 = 120
+  
+  a1 = 0
+  a2 = 0
   
   while(True):
     # Read image, scale and gray scale
@@ -43,8 +46,10 @@ def main():
     
     # Draw lines from prediction
     canvas = cv2.resize(raw_frame, (640, 480))
-    a1 = prediction[0][0]
-    a2 = prediction[0][1]
+    alpha = .5
+    
+    a1 = ((1-alpha)*prediction[0][0]) + a1*alpha
+    a2 = ((1-alpha)*prediction[0][1]) + a2*alpha
     
     # Calculate points
     p1 = (int(cos(a1)*l1 + p0[0]), int(sin(a1)*l1 + p0[1]))
