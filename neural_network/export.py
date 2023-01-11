@@ -53,24 +53,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-    #   	## Retrieve network weights after training. Skip layer 0 (input layer)
-    # for w in range(1, len(model.layers)):
-    #     print(w)
-    #     weight_filename = "layer_" + str(w) + "_weights.txt" 
-    #     open(weight_filename, 'w').close() # clear file
-    #     file = open(weight_filename,"a") 
-    #     file.write('{')
-    #     for i in range(model.layers[w].weights[0].numpy().shape[0]):
-    #         file.write('{')
-    #         for j in range(model.layers[w].weights[0].numpy().shape[1]):
-    #             file.write(str(model.layers[w].weights[0].numpy()[i][j]))
-    #             if j != model.layers[w].weights[0].numpy().shape[1]-1:
-    #                 file.write(', ')
-    #         file.write('}')
-    #         if i != model.layers[w].weights[0].numpy().shape[0]-1:
-    #             file.write(', \n')
-    #     file.write('}')
-    #     file.close()
