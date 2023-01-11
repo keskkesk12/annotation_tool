@@ -1,17 +1,10 @@
 import tensorflow as tf
-import pandas as pd
-import numpy as np
-import cv2
-import os
 keras = tf.keras
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import Flatten
 from math import *
 
 header = """#include "ap_int.h"
 #include <cstdint>
-#include "ap_fixed.h\n"""
+#include "ap_fixed.h"\n"""
 
 
 def main():

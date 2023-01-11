@@ -1,6 +1,6 @@
 #include "ap_int.h"
 #include <cstdint>
-#include "ap_fixed.h
+#include "ap_fixed.h"
 #define n_inputs 288
 #define n_layer1 128
 #define n_layer2 64
