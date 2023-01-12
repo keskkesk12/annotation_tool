@@ -13,6 +13,8 @@ import csv
 from sklearn.utils import shuffle
 
 
+width = 48*2
+height = 27*2
 
 def readImages(path):
     data = []
@@ -20,6 +22,7 @@ def readImages(path):
     for filename in sorted(os.listdir(path)):
         img = cv2.imread(os.path.join(path, filename),
                          0)  # read img as grayscale
+        img = cv2.resize(img, (width, height), interpolation = cv2.INTER_AREA)
         data.append(img/255)
     data = np.asarray(data).astype('float32')    
     return data
@@ -42,8 +45,6 @@ def main():
     
     # Read all labels
     print("Loading labels")
-    width = 48*3
-    height = 27*3
     labels = readLabels("../training_labels/labels.csv", width, height)
 
     # Shuffle labels and data
@@ -89,7 +90,7 @@ def main():
     model.summary()
 
     # Save model
-    model.save('keras_model')
+    model.save('keras_model_small')
 
     results = model.evaluate(testing_data, testing_labels, verbose=0)
     print("test loss, test acc: ", results)
