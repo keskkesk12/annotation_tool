@@ -15,7 +15,7 @@ def main():
   
   # Capture image from webcam
   # camera = cv2.VideoCapture("../testing_data/1.mp4")
-  camera = cv2.VideoCapture(0)
+  camera = cv2.VideoCapture(4)
   
   # Create named window
   cv2.namedWindow(name)
@@ -47,7 +47,7 @@ def main():
     prediction = model.predict(predict_frame)
     
     # Draw lines from prediction
-    canvas = cv2.resize(raw_frame, (width, height))
+    # canvas = cv2.resize(raw_frame, (width, height))
     # alpha = 0
     
     # # Low pass filter angles
@@ -61,14 +61,14 @@ def main():
     # # Draw lines
     # cv2.line(canvas, p0, p1, (255, 0, 0), 3)
     # cv2.line(canvas, p1, p2, (0, 0, 255), 3)
-    
-    x = int(prediction[0][0])
-    y = int(prediction[0][1])
-    cv2.circle(canvas, (x,y), 5, (255, 0, 0), -1)
+    frame_height, frame_width, _ = raw_frame.shape
+    x = int(prediction[0][0] * frame_width/width)
+    y = int(prediction[0][1] * frame_height/height)
+    cv2.circle(raw_frame, (x,y), 50, (255, 0, 0), -1)
     
     print(x, y)
     # Show image
-    cv2.imshow(name, canvas)
+    cv2.imshow(name, raw_frame)
 
     # End program
     key = cv2.waitKey(10)
