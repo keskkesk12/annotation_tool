@@ -14,8 +14,8 @@ def main():
   name = "Image"
   
   # Capture image from webcam
-  camera = cv2.VideoCapture("../raw_data/aruco_test_3.mp4")
-  # camera = cv2.VideoCapture(0)
+  # camera = cv2.VideoCapture("../testing_data/1.mp4")
+  camera = cv2.VideoCapture(0)
   
   # Create named window
   cv2.namedWindow(name)
@@ -29,12 +29,14 @@ def main():
   
   a1 = 0
   a2 = 0
+  width = 48*3
+  height = 27*3
   
   while(True):
     # Read image, scale and gray scale
     ret, raw_frame = camera.read()
     
-    color_frame = cv2.resize(raw_frame, (24, 12))
+    color_frame = cv2.resize(raw_frame, (width, height))
     frame = cv2.cvtColor(color_frame, cv2.COLOR_BGR2GRAY)
     
     # Convert image to array
@@ -45,20 +47,26 @@ def main():
     prediction = model.predict(predict_frame)
     
     # Draw lines from prediction
-    canvas = cv2.resize(raw_frame, (640, 480))
-    alpha = .5
+    canvas = cv2.resize(raw_frame, (width, height))
+    # alpha = 0
     
-    a1 = ((1-alpha)*prediction[0][0]) + a1*alpha
-    a2 = ((1-alpha)*prediction[0][1]) + a2*alpha
+    # # Low pass filter angles
+    # a1 = ((1-alpha)*prediction[0][0]) + a1*alpha
+    # a2 = ((1-alpha)*prediction[0][1]) + a2*alpha
     
-    # Calculate points
-    p1 = (int(cos(a1)*l1 + p0[0]), int(sin(a1)*l1 + p0[1]))
-    p2 = (int(cos(a2)*l2 + p1[0]), int(sin(a2)*l2 + p1[1]))
+    # # Calculate points
+    # p1 = (int(cos(a1)*l1 + p0[0]), int(sin(a1)*l1 + p0[1]))
+    # p2 = (int(cos(a2)*l2 + p1[0]), int(sin(a2)*l2 + p1[1]))
 
-    # Draw lines
-    cv2.line(canvas, p0, p1, (255, 0, 0), 3)
-    cv2.line(canvas, p1, p2, (0, 0, 255), 3)
+    # # Draw lines
+    # cv2.line(canvas, p0, p1, (255, 0, 0), 3)
+    # cv2.line(canvas, p1, p2, (0, 0, 255), 3)
     
+    x = int(prediction[0][0])
+    y = int(prediction[0][1])
+    cv2.circle(canvas, (x,y), 5, (255, 0, 0), -1)
+    
+    print(x, y)
     # Show image
     cv2.imshow(name, canvas)
 
