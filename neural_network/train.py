@@ -13,8 +13,8 @@ import csv
 from sklearn.utils import shuffle
 
 
-width = 48*2
-height = 27*2
+width = 48
+height = 27
 
 def readImages(path):
     data = []
@@ -60,7 +60,7 @@ def main():
     training_labels = labels[k:]
     testing_labels = labels[:k]
     
-
+    
     # Make model
     model = Sequential([
         Conv2D(4, (3, 3), activation='relu', input_shape=(height, width, 1)),
@@ -79,6 +79,7 @@ def main():
         Dense(2, activation='linear', use_bias=True),
     ])
 
+
     model.compile(optimizer='adam',
                   loss='mean_squared_error',
                   metrics=['accuracy'])
@@ -90,18 +91,10 @@ def main():
     model.summary()
 
     # Save model
-    model.save('keras_model_small')
+    model.save('keras_model_fc')
 
     results = model.evaluate(testing_data, testing_labels, verbose=0)
     print("test loss, test acc: ", results)
-
-
-    # Save predictions to visualization
-    predictions = model.predict(testing_data)
-    file = open('../viz/output.csv', 'w+', newline='')
-    with file:
-        write = csv.writer(file)
-        write.writerows(predictions)
 
 if __name__ == "__main__":
     main()
