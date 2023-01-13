@@ -4,8 +4,6 @@
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/point.hpp"
 #include "dynamixel_sdk_custom_interfaces/msg/set_position.hpp"
-
-
 #define a1_len 5
 #define a2_len 5
 
