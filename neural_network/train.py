@@ -63,19 +63,19 @@ def main():
     
     # Make model
     model = Sequential([
-        Conv2D(4, (3, 3), activation='relu', input_shape=(height, width, 1)),
+        Conv2D(4, (3, 3), activation='relu', padding="valid", use_bias="False", input_shape=(height, width, 1)),
         MaxPooling2D((2, 2)),
-        Conv2D(4, (3, 3), activation='relu'),
+        Conv2D(4, (3, 3), activation='relu', padding="valid", use_bias="False"),
         MaxPooling2D((2, 2)),
-        Conv2D(4, (3, 3), activation='relu'),
+        Conv2D(4, (3, 3), activation='relu', padding="valid", use_bias="False"),
         MaxPooling2D((2, 2)),
         # Flatten(input_shape=(12, 24)),		# reshape 12x24 to 288, layer 0
         Flatten(),
         Dense(128, activation='relu', use_bias=True),
         # Dense(64, activation='relu', use_bias=True),
         Dense(32, activation='relu', use_bias=True),
-        Dense(16, activation='relu', use_bias=True),
-        # Dense(8, activation='relu', use_bias=True),
+        # Dense(16, activation='relu', use_bias=True),
+        Dense(8, activation='relu', use_bias=True),
         Dense(2, activation='linear', use_bias=True),
     ])
 
@@ -85,13 +85,13 @@ def main():
                   metrics=['accuracy'])
 
     # Train model
-    model.fit(training_data, training_labels, epochs=150,
+    model.fit(training_data, training_labels, epochs=250,
               batch_size=128, validation_split=0.1, shuffle=True)
     
     model.summary()
 
     # Save model
-    model.save('keras_model_fc')
+    model.save('keras_model_small')
 
     results = model.evaluate(testing_data, testing_labels, verbose=0)
     print("test loss, test acc: ", results)
