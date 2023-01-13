@@ -50,7 +50,7 @@
 
 // Default setting
 #define BAUDRATE 1000000  // Default Baudrate of DYNAMIXEL X series
-#define DEVICE_NAME "/dev/ttyACM1"  // [Linux]: "/dev/ttyUSB*", [Windows]: "COM*"
+#define DEVICE_NAME "/dev/ttyACM0"  // [Linux]: "/dev/ttyUSB*", [Windows]: "COM*"
 
 dynamixel::PortHandler * portHandler;
 dynamixel::PacketHandler * packetHandler;
@@ -64,7 +64,7 @@ ReadWriteNode::ReadWriteNode()
 {
   RCLCPP_INFO(this->get_logger(), "Run read write node");
 
-  this->declare_parameter("qos_depth", 1);
+  this->declare_parameter("qos_depth", 10);
   int8_t qos_depth = 0;
   this->get_parameter("qos_depth", qos_depth);
 
