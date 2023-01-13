@@ -9,11 +9,17 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(geometry_msgs REQUIRED)
+
+include_directories(driver/include)
 
 add_executable(helloworld src/helloworld.cpp)
 
-add_executable(hand_detector src/hand_detector.cpp)
-ament_target_dependencies(hand_detector rclcpp std_msgs)
+add_executable(hand_detector src/hand_detector.cpp driver/src/bram_uio.cpp driver/src/xnn_inference.c driver/src/xnn_inference_linux.c driver/src/xnn_inference_sinit.c)
+ament_target_dependencies(hand_detector rclcpp std_msgs OpenCV sensor_msgs cv_bridge geometry_msgs)
 
 add_executable(arm_controller src/arm_controller.cpp)
 ament_target_dependencies(arm_controller rclcpp std_msgs)
