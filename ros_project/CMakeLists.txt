@@ -13,8 +13,14 @@ find_package(OpenCV REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 
 include_directories(driver/include)
+
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/SetPosition.msg"
+)
 
 add_executable(helloworld src/helloworld.cpp)
 
