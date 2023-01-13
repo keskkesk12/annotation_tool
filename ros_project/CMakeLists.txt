@@ -14,6 +14,8 @@ find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+find_package(dynamixel_sdk REQUIRED PATH ./dynamixel_sdk)
+find_package(dynamixel_sdk_custom_interfaces REQUIRED)
 
 include_directories(driver/include)
 
@@ -28,7 +30,10 @@ add_executable(hand_detector src/hand_detector.cpp driver/src/bram_uio.cpp drive
 ament_target_dependencies(hand_detector rclcpp std_msgs OpenCV sensor_msgs cv_bridge geometry_msgs)
 
 add_executable(arm_controller src/arm_controller.cpp)
-ament_target_dependencies(arm_controller rclcpp std_msgs)
+ament_target_dependencies(arm_controller rclcpp std_msgs geometry_msgs dynamixel_sdk_custom_interfaces dynamixel_sdk)
+
+add_executable(read_write_node src/read_write_node.cpp)
+ament_target_dependencies(read_write_node rclcpp dynamixel_sdk_custom_interfaces dynamixel_sdk)
 
 # uncomment the following section in order to fill in
 # further dependencies manually.
