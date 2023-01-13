@@ -8,6 +8,7 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
+#include <random>
 
 // Opencv
 #include <opencv2/core/core.hpp>
@@ -18,11 +19,42 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/aruco.hpp>
 
-#include <eigen3/Eigen/Dense>
+
+cv::Mat translateImg(cv::Mat &img, int offsetx, int offsety, float ang, float zoom){
+  cv::Size size = img.size();
+
+  float x = size.width/2;
+  float y = size.height/2;
+
+  cv::Mat r = cv::getRotationMatrix2D(cv::Point2f(x, y), ang*180.0/M_PI, zoom);
+
+  r.at<double>(0, 2) += offsetx;
+  r.at<double>(1, 2) += offsety;
+
+  cv::warpAffine(img,img,r,img.size());
+  return img;
+}
+
+
+void augmentImage(cv::Mat& img){
+  std::random_device rd; // obtain a random number from hardware
+  std::mt19937 gen(rd()); // seed the generator
+  std::normal_distribution<> x_distr(0, .125);
+  std::normal_distribution<> y_distr(0, .125);
+  std::normal_distribution<> rot_distr(0, M_PI/7);
+  std::normal_distribution<> zoom_distr(1.125, .2);
+
+  cv::Size size = img.size();
+  translateImg(img, size.width*x_distr(gen), size.height*y_distr(gen), rot_distr(gen), zoom_distr(gen));
+
+  // Brightness augmentation
+  std::normal_distribution<> alpha_distr(1, .4);
+  std::normal_distribution<> beta_distr(0, .4);
+  img.convertTo(img, -1, alpha_distr(gen), beta_distr(gen));
+}
 
 
 
-using Eigen::Vector2f;
 
 int main() {
   // Opencv window
@@ -33,9 +65,12 @@ int main() {
   std::ofstream labels("../training_labels/labels.csv");
 
   bool running = true;
-  cv::Size image_size(1920, 1080);
+  cv::Size image_size(1280, 720);
+  cv::Size output_size(48*3, 27*3);
+  cv::Mat heat_map(image_size, CV_8UC1, cv::Scalar(0));
 
   int index = 0;
+  int aug_num = 10;
 
   // Videos in folder
   for (const auto & entry : std::filesystem::directory_iterator("../raw_data")){
@@ -44,77 +79,87 @@ int main() {
     cv::Mat frame;
 
     // Process each frame
-    while (true){
+    while (running){
       capture >> frame;
       if (frame.empty()){
         break;
       }
+      cv::Mat aug_frame;
 
-      // Process frame
-      cv::resize(frame, frame, image_size);
-      std::vector<int> markerIds;
-      std::vector<std::vector<cv::Point2f>> markerCorners, rejectedCandidates;
-      cv::Ptr<cv::aruco::DetectorParameters> parameters = cv::aruco::DetectorParameters::create();
-      cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
-      cv::aruco::detectMarkers(frame, dictionary, markerCorners, markerIds, parameters, rejectedCandidates);
+      for(int k = 0; k < aug_num; k++){
+        frame.copyTo(aug_frame);
+        augmentImage(aug_frame);
 
-
-      // Draw points on image if all points are detected
-      if(markerIds.size() == 3){
-
-        std::vector<cv::Point2f> centers;
-        for(int i = 0; i < markerCorners.size(); i++){
-          auto index = find(markerIds.begin(), markerIds.end(), i);
-          if(index == markerIds.end()){
-            continue;
-          }
+        // Process frame
+        cv::resize(aug_frame, aug_frame, image_size);
+        std::vector<int> markerIds;
+        std::vector<std::vector<cv::Point2f>> markerCorners, rejectedCandidates;
+        cv::Ptr<cv::aruco::DetectorParameters> parameters = cv::aruco::DetectorParameters::create();
+        cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
+        cv::aruco::detectMarkers(aug_frame, dictionary, markerCorners, markerIds, parameters, rejectedCandidates);
+                
+        // Draw points on image if all points are detected
+        if(markerIds.size() == 1){
 
           cv::Point2f center;
-
-          for(int j = 0; j < markerCorners[index - markerIds.begin()].size(); j++){
-            center += markerCorners[index - markerIds.begin()][j];
+          for(int j = 0; j < markerCorners[0].size(); j++){
+            center += markerCorners[0][j];
           }
           center /= 4.0;
-          centers.push_back(center);
-        }
 
-        for(int i = 0; i < centers.size(); i++){
-          // Draw circles
-          cv::circle(frame, centers[i], 8, cv::Scalar(0, 255, 255), 2);
-          // Draw lines
-          if(i > 0){
-            cv::line(frame, centers[i-1], centers[i], cv::Scalar(255, 0, 0), 3);
+          // Draw on heatmap
+          heat_map.at<char>(center) = 255;
+
+          std::vector<std::vector<cv::Point>> contours;
+          std::vector<cv::Point> contour;
+          for(int i = 0; i < markerCorners[0].size(); i++){
+            cv::Point p = cv::Point(int(markerCorners[0][i].x), int(markerCorners[0][i].y));
+            cv::Point int_center(center.x, center.y);
+            cv::Point dif = int_center - p;
+
+            contour.push_back(int_center - dif*1.9);
           }
+          contours.push_back(contour);
+
+          // Draw mask
+          cv::Mat mask(image_size, CV_8UC1, cv::Scalar(0));
+          cv::drawContours(mask, contours, 0, 255, -1);
+
+
+          // Draw center
+          cv::circle(aug_frame, center, 8, cv::Scalar(255, 0, 255), 2);
+
+          std::stringstream ss;
+          ss << std::setw(6) << std::setfill('0') << index++;
+          std::string s = ss.str();
+
+          cv::inpaint(aug_frame, mask, aug_frame, 20, cv::INPAINT_TELEA);
+
+          // std::cout << center.x << ", " << center.y << std::endl;
+          std::cout << index << std::endl;
+
+          cv::Mat frame_out;
+          cv::resize(aug_frame, frame_out, output_size);
+          cv::cvtColor(frame_out, frame_out, cv::COLOR_BGR2GRAY);
+
+          cv::imwrite("../training_data/" + s + ".bmp", frame_out);
+
+          labels << center.x/float(image_size.width) << ", " << center.y/float(image_size.height) << "\n";
+
+          // Visualize output
+          // cv::imshow(name, aug_frame);
+          // char key = cv::waitKey(-1);
+          // if(key == 'q'){
+          //   running = false;
+          //   break;
+          // }
         }
-
-        // Calculate angles
-        float shoulder_angle = atan2(centers[1].y - centers[0].y , centers[1].x - centers[0].x);
-        float elbow_angle = atan2(centers[2].y - centers[1].y , centers[2].x - centers[1].x);
-        std::cout << shoulder_angle << ", " << elbow_angle << std::endl;
-
-        std::stringstream ss;
-        ss << std::setw(6) << std::setfill('0') << index++;
-        std::string s = ss.str();
-
-
-        cv::Mat frame_out;
-        cv::resize(frame, frame_out, cv::Size(24, 12));
-        cv::cvtColor(frame_out, frame_out, cv::COLOR_BGR2GRAY);
-
-        cv::imwrite("../training_data/" + s + ".png", frame_out);
-
-        labels << shoulder_angle << ", " << elbow_angle << "\n";
-      }
-
-      cv::imshow(name, frame);
-      char key = cv::waitKey(2);
-      
-      if(key == 'q'){
-        running = false;
-        break;
       }
     }
   }
+
+  cv::imshow(name, heat_map);
+  cv::waitKey(-1);
 
   labels.close();
 

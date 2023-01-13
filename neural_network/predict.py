@@ -14,27 +14,26 @@ def main():
   name = "Image"
   
   # Capture image from webcam
-  camera = cv2.VideoCapture("../raw_data/aruco_test_3.mp4")
-  # camera = cv2.VideoCapture(0)
+  # camera = cv2.VideoCapture("../testing_data/1.mp4")
+  camera = cv2.VideoCapture(0)
   
   # Create named window
   cv2.namedWindow(name)
   
-  model = keras.models.load_model("keras_model")
+  model = keras.models.load_model("keras_model_small")
 
   # Constants for visualization
-  p0 = (430, 200)
-  l1 = 120
-  l2 = 120
-  
-  a1 = 0
-  a2 = 0
+  width = 48
+  height = 27
+  x = 0
+  y = 0
+  alpha = .3
   
   while(True):
     # Read image, scale and gray scale
     ret, raw_frame = camera.read()
     
-    color_frame = cv2.resize(raw_frame, (24, 12))
+    color_frame = cv2.resize(raw_frame, (width, height))
     frame = cv2.cvtColor(color_frame, cv2.COLOR_BGR2GRAY)
     
     # Convert image to array
@@ -44,23 +43,16 @@ def main():
     # Predict angle using model
     prediction = model.predict(predict_frame)
     
-    # Draw lines from prediction
-    canvas = cv2.resize(raw_frame, (640, 480))
-    alpha = .5
-    
-    a1 = ((1-alpha)*prediction[0][0]) + a1*alpha
-    a2 = ((1-alpha)*prediction[0][1]) + a2*alpha
-    
-    # Calculate points
-    p1 = (int(cos(a1)*l1 + p0[0]), int(sin(a1)*l1 + p0[1]))
-    p2 = (int(cos(a2)*l2 + p1[0]), int(sin(a2)*l2 + p1[1]))
+    frame_height, frame_width, _ = raw_frame.shape
+    x_new = int(prediction[0][0] * frame_width/width)
+    y_new = int(prediction[0][1] * frame_height/height)
+    x = alpha*x_new + (1-alpha) * x
+    y = alpha*y_new + (1-alpha) * y
 
-    # Draw lines
-    cv2.line(canvas, p0, p1, (255, 0, 0), 3)
-    cv2.line(canvas, p1, p2, (0, 0, 255), 3)
+    cv2.circle(raw_frame, (int(x),int(y)), 50, (255, 0, 0), -1)
     
     # Show image
-    cv2.imshow(name, canvas)
+    cv2.imshow(name, raw_frame)
 
     # End program
     key = cv2.waitKey(10)
