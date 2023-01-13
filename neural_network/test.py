@@ -87,9 +87,13 @@ def main():
 
 
     
+<<<<<<< HEAD
 
         # file.write("}\n")
     # print(model.get_weights()[2][:, :, 3, :].transpose((2, 1, 0)))
+=======
+    print(model.layers[0].get_weights())
+>>>>>>> a18f2625ceeb68c194af8db3876bc34933b5dbdf
 
 
 if __name__ == "__main__":
