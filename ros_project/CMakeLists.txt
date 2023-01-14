@@ -35,6 +35,8 @@ ament_target_dependencies(arm_controller rclcpp std_msgs geometry_msgs dynamixel
 add_executable(read_write_node src/read_write_node.cpp)
 ament_target_dependencies(read_write_node rclcpp dynamixel_sdk dynamixel_sdk_custom_interfaces)
 
+add_executable(visualize src/visualize.cpp)
+ament_target_dependencies(visualize rclcpp OpenCV sensor_msgs cv_bridge geometry_msgs)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -48,6 +50,9 @@ install(TARGETS hand_detector
 
 install(TARGETS arm_controller
   DESTINATION lib/${PROJECT_NAME})
+
+install(TARGETS visualize
+DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
