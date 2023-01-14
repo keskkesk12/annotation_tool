@@ -8,10 +8,10 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/image.hpp>
 #include <cv_bridge/cv_bridge.h>
-#include "geometry_msgs/msg/pose_stamped.hpp"
+#include "geometry_msgs/msg/point.hpp"
 
-#define width 24
-#define height 12
+#define width 54
+#define height 30
 
 std::vector<float> img2vec(cv::Mat img)
 {
@@ -86,7 +86,7 @@ class HandDetector : public rclcpp::Node
 
       // start network and wait for it to finish
       XNn_inference_Start(InstancePtr);
-      while(!XNn_inference_IsIdle(InstancePtr));
+      while(!XNn_inference_IsIdle(InstancePtr)) {};
 
       // create and publish position
 			geometry_msgs::msg::Point p;
