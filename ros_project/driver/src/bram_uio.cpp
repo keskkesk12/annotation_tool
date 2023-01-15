@@ -1,5 +1,6 @@
 /***************************** Include Files *********************************/
 #include "bram_uio.hpp"
+#include <iostream>
 
 /************************** Function Implementation *************************/
 
@@ -22,6 +23,7 @@ BRAM::BRAM(unsigned int uio_number, unsigned int size) {
         ss << "Could not map memory";
         throw ss.str();
     }
+    std::cout << "BRAM " << uio_number << " initialized" << std::endl;
 }
 
 uint32_t& BRAM::operator[](unsigned int index) {

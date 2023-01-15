@@ -51,6 +51,9 @@ install(TARGETS hand_detector
 install(TARGETS arm_controller
   DESTINATION lib/${PROJECT_NAME})
 
+install(TARGETS read_write_node
+DESTINATION lib/${PROJECT_NAME})
+
 install(TARGETS visualize
 DESTINATION lib/${PROJECT_NAME})
 

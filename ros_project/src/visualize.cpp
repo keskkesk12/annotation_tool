@@ -68,7 +68,11 @@ class Visualize : public rclcpp::Node
             float y = p.y/float(HEIGHT)*newest_image.size().height;
             cv::Mat canvas;
             newest_image.copyTo(canvas);
-            cv::circle(canvas,cv::Point(int(x),int(y)),10,cv::Scalar(255,0,0),-1);
+            cv::resize(canvas, canvas, cv::Size(WIDTH, HEIGHT));
+            cv::circle(canvas,cv::Point(int(p.x),int(p.y)),2,cv::Scalar(255,0,0),-1);
+            std::cout << "x: " << p.x << " y: " << p.y << std::endl;
+            cv::resize(canvas,canvas,cv::Size(540,300));
+            cv::cvtColor(canvas, canvas, cv::COLOR_RGB2BGR);
             cv::imshow("Image",canvas);
             cv::waitKey(1);
 

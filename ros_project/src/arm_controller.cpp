@@ -24,7 +24,7 @@ float constrainedMap(float val, float old_min, float old_max, float new_min, flo
 class ArmController : public rclcpp::Node {
 public:
   ArmController() : Node("arm_controller") {
-    publisher_ = this->create_publisher<dynamixel_sdk_custom_interfaces::msg::SetPosition>("set_position", 1);
+    publisher_ = this->create_publisher<dynamixel_sdk_custom_interfaces::msg::SetPosition>("set_position", 2);
     subscription_ = this->create_subscription<geometry_msgs::msg::Point>("hand_position", 1, std::bind(&ArmController::topic_callback, this, _1));
   }
 
@@ -34,6 +34,9 @@ private:
 
   void topic_callback(const geometry_msgs::msg::Point msg) const
     {
+      float alpha = .3;
+      static float x_old = 0;
+      static float y_old = 0;
       //RCLCPP_INFO(this->get_logger(), "I heard: '%s'", msg->data.c_str());
       float min = 9.5;
       float max = 13.5;
@@ -47,8 +50,13 @@ private:
       float w = 4.;
       float h = 2.22;
 
-      float x = msg.x * w / frame_w + min;
-      float y = h / 2. - msg.y * h / frame_h;
+      float x = ((54-msg.x) * w / frame_w + min) * alpha + (1-alpha)*x_old;
+      float y = (h / 2. - msg.y * h / frame_h) * alpha + (1-alpha)*y_old;
+
+      x_old = x;
+      y_old = y;
+
+
 
       float theta2 = acos(constrain((std::pow(x, 2) + std::pow(y, 2) - std::pow(l1, 2) - std::pow(l2, 2)) / (2 * l1 * l2), -1 ,1));
       float theta1 = atan2(y, x) - atan2((l2*sin(theta2)), (l1 + l2 * cos(theta2)));
